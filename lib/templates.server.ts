@@ -1,32 +1,14 @@
 import { cache } from "react";
+import { templates } from "@/lib/templates.data";
 
-export type ThemeName = "classic-blue" | "modern-emerald";
+export type ThemeName = (typeof templates)[number]["key"];
+export type ThemeConfig = (typeof templates)[number];
 
-export type ThemeConfig = {
-  key: ThemeName;
-  templateName: string;
-  colors: Record<string, string>;
-};
-
-function getBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
-
-export const getTemplates = cache(async (): Promise<ThemeConfig[]> => {
-  const res = await fetch(`${getBaseUrl()}/api/templates`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to load templates: ${res.status}`);
-  }
-
-  return res.json();
+export const getTemplates = cache(async () => {
+  return templates;
 });
 
 export async function getTemplateByKey(key?: string | null) {
-  const templates = await getTemplates();
-  return templates.find((t) => t.key === key) ?? templates[0];
+  const list = await getTemplates();
+  return list.find((t) => t.key === key) ?? list[0];
 }
